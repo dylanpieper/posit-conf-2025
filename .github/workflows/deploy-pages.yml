@@ -1,0 +1,57 @@
+name: Deploy Report to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # Allows manual triggering
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Prepare deployment directory
+      run: |
+        mkdir -p _site
+        
+        # Copy the HTML file as index.html
+        cp report/report.html _site/index.html
+        
+        # Copy the report_files directory
+        if [ -d "report/report_files" ]; then
+          cp -r report/report_files _site/
+        fi
+        
+        # Copy the image file
+        if [ -f "report/chatbot_invasion.png" ]; then
+          cp report/chatbot_invasion.png _site/
+        fi
+        
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '_site'
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

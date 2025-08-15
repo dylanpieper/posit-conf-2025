@@ -1,0 +1,521 @@
+---
+title: "How to use LLMs to improve specialized ML tools"
+subtitle: "The case of criminal offense classification"
+author: "Dylan Pieper"
+format: 
+  revealjs:
+    theme: white
+    slide-number: true
+    transition: fade
+    margin: 0.05
+    width: 1200
+    height: 900
+    css: custom.css
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_knit$set(root.dir = "..")
+
+green <- "darkgreen"
+orange <- "#DE6F00"
+red <- "#CD5C5C"
+```
+
+## The dilemma 😫
+Are specialized ML tools and LLMs in competition, or can they work together?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Specialized tools**:
+
+::: {.fragment fragment-index=1}
+- Better for specific tasks
+:::
+::: {.fragment fragment-index=2}
+- Validated and deterministic
+:::
+::: {.fragment fragment-index=3}
+- Straightforward to retrain
+:::
+:::
+
+::: {.column width="50%"}
+**LLMs**:
+
+::: {.fragment fragment-index=1}
+- Flexible for many tasks
+:::
+::: {.fragment fragment-index=2}
+- Not validated or deterministic
+:::
+::: {.fragment fragment-index=3}
+- Difficult to retrain
+:::
+:::
+
+::::
+
+## My use case 🔎
+
+::: {.incremental}
+- Classify 1,537 offense descriptions for a racial disparities study in Pennsylvania
+  - Get **UCCS crime type** (violent, public order, property, criminal traffic, drug, DUI; [Uniform Crime Classification Standard](https://www.science.org/doi/10.1126/sciadv.abq8123))
+  - Get harm-based measures ([UK's Office for National Statistics](https://www.ons.gov.uk/peoplepopulationandcommunity/crimeandjustice/articles/theimpactofcrimeonvictimsandsociety/march2022))
+:::
+
+## {data-background-image="chatbot_black_mirror.png" data-background-size="contain"}
+
+## Goals 🎯
+
+::: {.incremental}
+1. **Evaluation**: 
+  - Use LLM to discover biases and limitations of specialized tool through model disagreement and uncertainty
+  - Use specialized tool as baseline to evaluate LLM performance through distribution overlap (PA offenses)
+  
+2. **Extension**: Use LLMs to get data not otherwise available
+:::
+
+## Tools 🛠️
+
+::: {.incremental}
+- **TOC**: 
+  - Text-based Offense Classification (specialized ML tool; [University of Michigan](https://cjars-toc.isr.umich.edu))
+  - Matches text to 258 codes ("murder") to get type ("violent")
+:::
+
+::: {.incremental}
+- **GPT-5**: LLM by [OpenAI](https://platform.openai.com/docs/models)
+  - ellmer's [parallel_chat()](https://ellmer.tidyverse.org/reference/parallel_chat.html) function
+  - ellmer's [structured data](https://ellmer.tidyverse.org/articles/structured-data.html) feature
+:::
+
+## TOC results
+
+Data TOC was "bad" at classifying:
+
+```{r, echo = FALSE}
+toc <- openxlsx::readWorkbook("cjars_toc.xlsx", sheet = 2)
+toc_uccs <- openxlsx::readWorkbook("cjars_toc.xlsx", sheet = 3)
+
+selected_examples <- c(
+  "IDSI Person W/Mental Disability",
+  "Aggravated Cruelty to Animals - Torture",
+  "Disarming Law Enforcement Officer",
+  "Furnishing Drug Free Urine-Use Or Attempt",
+  "Corrupt Organizations"
+)
+
+toc_preview <- toc |>
+  dplyr::mutate(dplyr::across(where(is.numeric), ~round(.x, 3))) |>
+  dplyr::left_join(toc_uccs, by = "uccs_code") |>
+  dplyr::mutate(
+    description = stringr::str_squish(description),
+    offense_type_desc = tolower(offense_type_desc)
+  ) |>
+  dplyr::select(description, charge_desc, crime_type = offense_type_desc, probability) |>
+  dplyr::filter(description %in% selected_examples) |>
+  dplyr::arrange(description)
+  
+DT::datatable(toc_preview, 
+   colnames = c(
+    "Description" = "description",
+    "UCCS Code" = "charge_desc",
+    "Crime Type" = "crime_type", 
+    "Probability" = "probability"
+  ),
+  options = list(
+    scrollX = TRUE, 
+     pageLength = 10, 
+     dom = 't',
+     ordering = FALSE
+   )
+) |>
+DT::formatStyle(columns = 1:ncol(toc_preview), fontSize = '20px') |>
+DT::formatStyle(
+  'Description',
+  target = 'row',
+  backgroundColor = DT::styleEqual(
+    c("IDSI Person W/Mental Disability", "Aggravated Cruelty to Animals - Torture"), 
+    c("yellow", "yellow")
+  )
+)
+```
+
+::: {style="font-size: 0.4em;"}
+IDSI = Involuntary Deviate Sexual Intercourse
+:::
+
+**Mean confidence: `r scales::percent(mean(readxl::read_excel("cjars_toc.xlsx", sheet = 2) |> dplyr::pull(probability)), accuracy = 1)`**
+
+## LLM structured data
+
+```{r, eval = FALSE, echo = TRUE}
+schema <- type_object(
+  crime_type = type_enum(
+    c("violent", "public order", "property", "criminal traffic", 
+      "drug", "dui offense", "not known/missing"),
+    "The primary crime type.
+    If violent and another type clearly applies, choose violent.",
+  ),
+  harm_level = type_enum(
+    c("individual", "community", "institutional", "societal"),
+    "The primary harm level"
+  ),
+  harm_type = type_enum(
+    c("physical", "emotional or psychological", "financial or economic", 
+      "community safety", "privacy"),
+    "The primary harm type"
+  ),
+  uncertainty_score = type_number(
+    "Your uncertainty in the classification responses and scores,
+    higher scores reflect unclear or difficult to classify descriptions,
+    ranging from 0.0 to 1.0."
+  )
+)
+```
+
+## LLM results
+
+Data LLM was "good" at classifying:
+
+```{r, echo = FALSE}
+oai_dat <- utils::read.csv("schema_openai.csv") |>
+  dplyr::mutate(
+    description = read.csv("crimes.csv") |> dplyr::pull(description)
+  ) |>
+  dplyr::select(-interpret, -harm_score, -action_type) |>
+  dplyr::relocate(description)
+
+DT::datatable(oai_dat |>
+  dplyr::filter(description %in% selected_examples) |>
+  dplyr::arrange(description) |>
+  dplyr::mutate(probability = 1 - uncertainty_score) |>
+  dplyr::select(-uncertainty_score),
+  colnames = c(
+    "Description" = "description",
+    "Crime Type" = "crime_type",
+    "Harm Level" = "harm_level",
+    "Harm Type" = "harm_type",
+    "Probability" = "probability"
+  ),
+  options = list(
+    scrollX = TRUE, 
+    pageLength = 10, 
+    dom = 't',
+    ordering = FALSE
+  )
+) |>
+DT::formatStyle(columns = 1:ncol(oai_dat), fontSize = '20px') |>
+DT::formatStyle(
+  'Description',
+  target = 'row',
+  backgroundColor = DT::styleEqual(
+    c("IDSI Person W/Mental Disability", "Aggravated Cruelty to Animals - Torture"), 
+    c("yellow", "yellow")
+  )
+)
+```
+
+**Mean confidence: `r scales::percent(mean(1 - oai_dat$uncertainty_score), accuracy = 1)`**
+
+## Model agreement
+
+```{r, echo = FALSE}
+crime_types <- toc |>
+  dplyr::left_join(toc_uccs, by = "uccs_code") |>
+  dplyr::select(description, offense_type_desc, probability) |>
+  dplyr::mutate(
+    offense_type_desc = tolower(offense_type_desc),
+    description = stringr::str_squish(description)
+  ) |>
+  dplyr::rename(toc_crime_type = offense_type_desc) |>
+  dplyr::left_join(
+    oai_dat |> dplyr::mutate(description = stringr::str_squish(description)),
+    by = "description"
+  ) |>
+  dplyr::rename(openai_crime_type = crime_type) |>
+  dplyr::select(description, toc_crime_type, openai_crime_type, probability, uncertainty_score) |>
+  dplyr::mutate(
+    both_confident = probability >= 0.8 & uncertainty_score <= 0.2,
+    agreement = toc_crime_type == openai_crime_type,
+    review = dplyr::case_when(
+      both_confident & !agreement ~ "yes, disagree & certain",
+      !both_confident & !agreement ~ "yes, disagree & uncertain",
+      TRUE ~ "no"
+    )
+  ) |>
+  dplyr::select(-both_confident, -agreement)
+
+review_summary <- crime_types |>
+  dplyr::count(review) |>
+  dplyr::mutate(
+    percent = n / sum(n),
+    review_clean = dplyr::case_when(
+      review == "no" ~ "Agree",
+      review == "yes, disagree & uncertain" ~ "Disagree & uncertain",
+      review == "yes, disagree & certain" ~ "Disagree & certain"
+    ),
+    review_clean = forcats::fct_reorder(review_clean, n, .desc = TRUE)
+  )
+
+ggplot2::ggplot(review_summary, ggplot2::aes(x = review_clean, y = percent, fill = review_clean)) +
+  ggplot2::geom_col(width = 0.7) +
+  ggplot2::geom_text(
+    ggplot2::aes(label = paste0(scales::comma(n), "\n(", scales::percent(percent, accuracy = 0.1), ")")),
+    vjust = -0.5,
+    size = 6,
+    fontface = "bold",
+    color = "black"
+  ) +
+  ggplot2::scale_y_continuous(
+    labels = scales::percent_format(),
+    expand = ggplot2::expansion(mult = c(0, 0.35))
+  ) +
+  ggplot2::scale_fill_manual(
+    values = c(
+      "Agree" = green,
+      "Disagree & uncertain" = orange,
+      "Disagree & certain" = red
+    )
+  ) +
+  ggplot2::labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    legend.position = "none",
+    plot.title = ggplot2::element_text(size = 20, face = "bold", hjust = 0.5),
+    axis.text.x = ggplot2::element_text(size = 16),
+    axis.text.y = ggplot2::element_text(size = 14),
+    panel.grid.major.x = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank()
+  )
+```
+
+## Topics of disagreement 
+
+```{r, echo = FALSE}
+# summary disagreement table by crime type
+disagreement_by_type <- crime_types |>
+  dplyr::group_by(toc_crime_type) |>
+  dplyr::summarise(
+    total_cases = dplyr::n(),
+    disagreements = sum(toc_crime_type != openai_crime_type),
+    disagreement_rate = disagreements / total_cases,
+    .groups = 'drop'
+  ) |>
+  dplyr::arrange(desc(disagreement_rate)) |>
+  dplyr::mutate(
+    disagreement_rate_pct = scales::percent(disagreement_rate, accuracy = 0.1)
+  ) |>
+  dplyr::select(-disagreement_rate)
+
+DT::datatable(
+  disagreement_by_type,
+  colnames = c(
+    "Crime Type" = "toc_crime_type",
+    "Total Cases" = "total_cases", 
+    "Disagreements" = "disagreements",
+    "Disagreement Rate" = "disagreement_rate_pct"
+  ),
+  options = list(
+    scrollX = TRUE, 
+    pageLength = 10, 
+    dom = 't',
+    ordering = FALSE
+  )
+) |>
+  DT::formatStyle(columns = 1:ncol(disagreement_by_type), fontSize = '25px')
+```
+
+## Public order disagreements
+
+Use a comparison table to facilitate review:
+
+```{r, echo = FALSE}
+review_examples <- crime_types |>
+  dplyr::filter(review != "no") |>
+  dplyr::select(description, toc_crime_type, openai_crime_type, review) |>
+  dplyr::mutate(
+    review_type = dplyr::case_when(
+      review == "yes, disagree & certain" ~ "Disagree, certain",
+      review == "yes, disagree & uncertain" ~ "Disagree, uncertain"
+    )
+  ) |>
+  dplyr::select(description, toc_crime_type, openai_crime_type, review_type) |>
+  dplyr::filter(toc_crime_type %in% "public order") |>
+  dplyr::sample_n(8)
+
+DT::datatable(
+  review_examples,
+  colnames = c("Description", "TOC", "LLM", "Review"),
+  options = list(
+    scrollX = TRUE, 
+    pageLength = 10, 
+    dom = 't',
+    ordering = FALSE
+  )
+) |>
+  DT::formatStyle(
+    "review_type",
+    backgroundColor = DT::styleEqual(
+      c("Disagree, certain", "Disagree, uncertain"),
+      c(red, orange)
+    ),
+    color = "white",
+    fontWeight = "bold"
+  ) |>
+  DT::formatStyle(columns = 1:ncol(review_examples), fontSize = '20px')
+```
+
+## Bias detection
+I also discovered systematic biases:
+
+```{r, echo = FALSE}
+idsi_toc_num <- crime_types |>
+  dplyr::filter(stringr::str_detect(description, "IDSI")) |>
+  dplyr::filter(toc_crime_type == "violent") |>
+  nrow()
+
+idsi_openai_num <- crime_types |>
+  dplyr::filter(stringr::str_detect(description, "IDSI")) |>
+  dplyr::filter(openai_crime_type == "violent") |>
+  nrow()
+
+idsi_denom <- crime_types |>
+  dplyr::filter(stringr::str_detect(description, "IDSI")) |>
+  dplyr::filter(openai_crime_type == "violent") |>
+  nrow()
+
+ani_cruel_toc_num <- crime_types |>
+  dplyr::filter(stringr::str_detect(description, "Animal")) |>
+  dplyr::filter(toc_crime_type == "violent") |>
+  nrow()
+
+ani_cruel_openai_num <- crime_types |>
+  dplyr::filter(stringr::str_detect(description, "Animal")) |>
+  dplyr::filter(openai_crime_type == "violent") |>
+  nrow()
+
+ani_cruel_denom <- crime_types |>
+  dplyr::filter(stringr::str_detect(description, "Animal")) |>
+  dplyr::filter(openai_crime_type == "violent") |>
+  nrow()
+```
+
+::: {.fragment}
+**Sexual assaults misclassified**
+:::
+
+::: {.incremental}
+- TOC classified `r idsi_toc_num` of `r idsi_denom` as violent
+- LLM classified `r idsi_openai_num` of `r idsi_denom` as violent
+:::
+
+::: {.fragment}
+**Animal cruelty misclassified**
+:::
+
+::: {.incremental}
+- TOC classified `r ani_cruel_toc_num` of `r ani_cruel_denom` as violent
+- LLM classified `r ani_cruel_openai_num` of `r ani_cruel_denom` as violent
+:::
+
+## {data-background-image="chatbot_dogs.png" data-background-size="contain"}
+## {data-background-image="archie.jpg" data-background-size="contain"}
+
+## IDSI comparison
+
+```{r, echo = FALSE}
+review_examples <- crime_types |>
+  dplyr::select(description, toc_crime_type, openai_crime_type, review) |>
+  dplyr::mutate(
+    review_type = dplyr::case_when(
+      review == "no" ~ "Agree",
+      review == "yes, disagree & certain" ~ "Disagree, certain",
+      review == "yes, disagree & uncertain" ~ "Disagree, uncertain"
+    )
+  ) |>
+  dplyr::select(description, toc_crime_type, openai_crime_type, review_type) |>
+  dplyr::filter(stringr::str_detect(description, "IDSI")) |>
+  dplyr::arrange(description) |>
+  dplyr::slice_head(n = 10)
+
+DT::datatable(
+  review_examples,
+  colnames = c("Description", "TOC", "LLM", "Review"),
+  options = list(
+    scrollX = TRUE, 
+    pageLength = 10, 
+    dom = 't',
+    ordering = FALSE
+  )
+) |>
+  DT::formatStyle(
+    "review_type",
+    backgroundColor = DT::styleEqual(
+      c("Agree", "Disagree, certain", "Disagree, uncertain"),
+      c(green, red, orange)
+    ),
+    color = "white",
+    fontWeight = "bold"
+  ) |>
+DT::formatStyle(columns = 1:ncol(review_examples), fontSize = '20px')
+```
+
+## Hybrid framework
+
+**Not an binary decision**
+
+::: {.incremental}
+1. **Initial tool**: Develop specialized ML tool as a baseline
+
+2. **Auditing signal**: Use LLMs to identify disagreements, uncertain cases, and systematic biases
+
+3. **Human review**: Use model comparison to focus review and model retraining
+:::
+
+## Implications
+
+**The bias detection capability alone justifies LLM costs for criminal justice applications**
+
+::: {.fragment}
+**For ML tool users:**
+:::
+
+::: {.incremental}
+- Audit your classifications
+- Flag cases needing expert review
+- Report biases and limitations
+  - In your own work
+  - To tool developers
+:::
+
+## {data-background-image="ostrich_black_box.png" data-background-size="contain"}
+
+## Implications (cont'd)
+
+**For ML tool developers:**
+
+::: {.incremental}
+- Audit your tools using model disagreement methods
+- Create bias elimination and retraining workflows
+- Leave behind audit trails and write reports
+- If you have money, post bias bounties
+:::
+
+## Thank you️ ☺️
+
+**Questions?**
+
+::: {.fragment}
+**Contact**: Dylan Pieper
+
+- dylanpieper@gmail.com 
+- [dylanpieper.github.io](https://dylanpieper.github.io)
+
+**Repo**: [github.com/dylanpieper/posit-conf-2025](https://github.com/dylanpieper/posit-conf-2025)
+:::

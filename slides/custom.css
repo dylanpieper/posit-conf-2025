@@ -1,0 +1,101 @@
+/* Custom CSS for minimal styling */
+
+.reveal {
+  font-family: "Lato", sans-serif;
+  color: #222;
+  background-color: #fff;
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 1em;
+  line-height: 1.2;
+}
+
+.reveal h1 {
+  font-size: 2.2em;
+}
+
+.reveal h2 {
+  font-size: 1.8em;
+}
+
+.reveal p {
+  font-size: 1.1em;
+  line-height: 1.5;
+  margin-bottom: 0.8em;
+}
+
+.reveal .slides section {
+  text-align: left;
+}
+
+.reveal .slides section .title-slide {
+  text-align: center;
+}
+
+.reveal .slides section .title-slide h1,
+.reveal .slides section .title-slide h2,
+.reveal .slides section .title-slide h3 {
+  text-align: center;
+}
+
+/* Code blocks */
+.reveal pre code {
+  font-size: 0.9em;
+  line-height: 1.3;
+  padding: 15px;
+  border-radius: 5px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+/* Data tables */
+.reveal .dataTables_wrapper {
+  font-size: 0.8em;
+}
+
+/* Fragment styling */
+.reveal .fragment {
+  opacity: 0.4;
+}
+
+.reveal .fragment.visible {
+  opacity: 1;
+}
+
+/* Incremental lists */
+.reveal .incremental > * {
+  opacity: 0.4;
+}
+
+.reveal .incremental > *.visible {
+  opacity: 1;
+}
+
+/* Strong text */
+.reveal strong {
+  font-weight: 700;
+  color: #333;
+}
+
+/* Clean margins */
+.reveal .slides > section,
+.reveal .slides > section > section {
+  padding: 0;
+  margin: 5px;
+}
+
+/* Center images */
+.reveal img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
