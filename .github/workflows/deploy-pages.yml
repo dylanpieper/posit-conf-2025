@@ -31,37 +31,37 @@ jobs:
         mkdir -p _site
         
         # Copy the HTML file as index.html
-        cp slides/slides.html _site/index.html
+        cp slides.html _site/index.html
         
         # Copy the slides_files directory (revealjs assets)
-        if [ -d "slides/slides_files" ]; then
-          cp -r slides/slides_files _site/
+        if [ -d "slides_files" ]; then
+          cp -r slides_files _site/
         fi
         
         # Copy custom CSS file
-        if [ -f "slides/custom.css" ]; then
-          cp slides/custom.css _site/
+        if [ -f "custom.css" ]; then
+          cp custom.css _site/
         fi
         
-        # Copy all background images
-        if [ -f "slides/chatbot_black_mirror.png" ]; then
-          cp slides/chatbot_black_mirror.png _site/
+        # Copy all background images from img directory
+        if [ -f "img/chatbot_black_mirror.png" ]; then
+          cp img/chatbot_black_mirror.png _site/
         fi
         
-        if [ -f "slides/chatbot_dogs.png" ]; then
-          cp slides/chatbot_dogs.png _site/
+        if [ -f "img/chatbot_dogs.png" ]; then
+          cp img/chatbot_dogs.png _site/
         fi
         
-        if [ -f "slides/archie.jpg" ]; then
-          cp slides/archie.jpg _site/
+        if [ -f "img/archie.jpg" ]; then
+          cp img/archie.jpg _site/
         fi
         
-        if [ -f "slides/ostrich_black_box.png" ]; then
-          cp slides/ostrich_black_box.png _site/
+        if [ -f "img/ostrich_black_box.png" ]; then
+          cp img/ostrich_black_box.png _site/
         fi
         
-        if [ -f "slides/chatbot_invasion.png" ]; then
-          cp slides/chatbot_invasion.png _site/
+        if [ -f "img/chatbot_invasion.png" ]; then
+          cp img/chatbot_invasion.png _site/
         fi
         
     - name: Upload artifact

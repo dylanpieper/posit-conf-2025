@@ -28,72 +28,6 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
-    /* CSS for syntax highlighting */
-    html { -webkit-text-size-adjust: 100%; }
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
-    }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-    }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
-      }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      { color: #003b4f; background-color: #f1f3f5; }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-    }
-    code span { color: #003b4f; } /* Normal */
-    code span.al { color: #ad0000; } /* Alert */
-    code span.an { color: #5e5e5e; } /* Annotation */
-    code span.at { color: #657422; } /* Attribute */
-    code span.bn { color: #ad0000; } /* BaseN */
-    code span.bu { } /* BuiltIn */
-    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
-    code span.ch { color: #20794d; } /* Char */
-    code span.cn { color: #8f5902; } /* Constant */
-    code span.co { color: #5e5e5e; } /* Comment */
-    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
-    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
-    code span.dt { color: #ad0000; } /* DataType */
-    code span.dv { color: #ad0000; } /* DecVal */
-    code span.er { color: #ad0000; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #ad0000; } /* Float */
-    code span.fu { color: #4758ab; } /* Function */
-    code span.im { color: #00769e; } /* Import */
-    code span.in { color: #5e5e5e; } /* Information */
-    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
-    code span.op { color: #5e5e5e; } /* Operator */
-    code span.ot { color: #003b4f; } /* Other */
-    code span.pp { color: #ad0000; } /* Preprocessor */
-    code span.sc { color: #5e5e5e; } /* SpecialChar */
-    code span.ss { color: #20794d; } /* SpecialString */
-    code span.st { color: #20794d; } /* String */
-    code span.va { color: #111111; } /* Variable */
-    code span.vs { color: #20794d; } /* VerbatimString */
-    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-f563837468303362081e247dddd440d0.css">
   <link rel="stylesheet" href="custom.css">
@@ -229,7 +163,7 @@ Dylan Pieper
 </div>
 <div class="fragment" data-fragment-index="2">
 <ul>
-<li>Validated and deterministic</li>
+<li>Validated, deterministic</li>
 </ul>
 </div>
 <div class="fragment" data-fragment-index="3">
@@ -246,7 +180,7 @@ Dylan Pieper
 </div>
 <div class="fragment" data-fragment-index="2">
 <ul>
-<li>Not validated or deterministic</li>
+<li>Not validated, undeterministic</li>
 </ul>
 </div>
 <div class="fragment" data-fragment-index="3">
@@ -262,11 +196,15 @@ Dylan Pieper
 <li class="fragment">Classify 1,537 offense descriptions for a racial disparities study in Pennsylvania
 <ul>
 <li class="fragment">Get <strong>UCCS crime type</strong> (violent, public order, property, criminal traffic, drug, DUI; <a href="https://www.science.org/doi/10.1126/sciadv.abq8123">Uniform Crime Classification Standard</a>)</li>
-<li class="fragment">Get harm-based measures (<a href="https://www.ons.gov.uk/peoplepopulationandcommunity/crimeandjustice/articles/theimpactofcrimeonvictimsandsociety/march2022">UK’s Office for National Statistics</a>)</li>
+<li class="fragment">Get harm-based measures (<a href="https://www.ons.gov.uk/peoplepopulationandcommunity/crimeandjustice/articles/theimpactofcrimeonvictimsandsociety/march2022">UK’s Office for National Statistics</a>)
+<ul>
+<li class="fragment">Harm level (e.g., individual vs.&nbsp;institutional)</li>
+<li class="fragment">Harm type (e.g., physical vs.&nbsp;financial or economic)</li>
+</ul></li>
 </ul></li>
 </ul>
 </section>
-<section id="section" class="slide level2" data-background-image="chatbot_black_mirror.png" data-background-size="contain">
+<section id="section" class="slide level2" data-background-image="img/chatbot_black_mirror.png" data-background-size="contain">
 <h2></h2>
 </section>
 <section id="goals" class="slide level2">
@@ -301,11 +239,22 @@ Dylan Pieper
 </section>
 <section id="toc-results" class="slide level2">
 <h2>TOC results</h2>
+<p>Data TOC was “good” at classifying:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-73a41da35b80497e5eb7" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-73a41da35b80497e5eb7">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4"],["Incest of Minor - Complainant Under 13 Years","Invol. Deviate Sexual Intercourse W/Child","Murder Of The First Degree","Retail Theft-Take Mdse"],["statutory rape","rape","murder","theft, value unknown"],["violent","violent","violent","property"],[0.648,0.707,1,1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Description<\/th>\n      <th>UCCS Code<\/th>\n      <th>Off. Type<\/th>\n      <th>Probability<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"className":"dt-right","targets":4},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"description","targets":1},{"name":"charge_desc","targets":2},{"name":"offense_type","targets":3},{"name":"probability","targets":4}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'20px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'20px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'20px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'20px'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+</div>
+</div>
+<p><strong>Mean confidence: 92%</strong></p>
+</section>
+<section id="toc-results-contd" class="slide level2">
+<h2>TOC results (cont’d)</h2>
 <p>Data TOC was “bad” at classifying:</p>
 <div class="cell">
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-3492074fb4511b006add" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-3492074fb4511b006add">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],["Aggravated Cruelty to Animals - Torture","Corrupt Organizations","Disarming Law Enforcement Officer","Furnishing Drug Free Urine-Use Or Attempt","IDSI Person W/Mental Disability"],["Public Order Offense, Other","Financial Crimes","Obstruction/Resisting","Forgery/Fraud","Forgery/Fraud"],["public order","property","public order","property","property"],[1,0.99,0.999,0.834,0.667]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Description<\/th>\n      <th>UCCS Code<\/th>\n      <th>Crime Type<\/th>\n      <th>Probability<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"className":"dt-right","targets":4},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"description","targets":1},{"name":"charge_desc","targets":2},{"name":"crime_type","targets":3},{"name":"probability","targets":4}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'20px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'20px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'20px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'20px'});\nvar value=data[1]; $(row).css({'background-color':value == \"IDSI Person W/Mental Disability\" ? \"yellow\" : value == \"Aggravated Cruelty to Animals - Torture\" ? \"yellow\" : null});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-a130ec66ff01dab409d6" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-a130ec66ff01dab409d6">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4"],["Aggravated Cruelty to Animals - Torture","IDSI Person W/Mental Disability","Incest of Minor - Complainant 13-18 Years","Unlawful To Fire Any Weapon/Firearm/rocket In City"],["public order offense, other","forgery/fraud","offense against morals/decency","grand theft (&gt;$500)"],["public order","property","public order","property"],[1,0.667,0.4,0.695]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Description<\/th>\n      <th>UCCS Code<\/th>\n      <th>Off. Type<\/th>\n      <th>Probability<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"className":"dt-right","targets":4},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"description","targets":1},{"name":"charge_desc","targets":2},{"name":"offense_type","targets":3},{"name":"probability","targets":4}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'20px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'20px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'20px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'20px'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
 </div>
 </div>
 <div style="font-size: 0.4em;">
@@ -313,43 +262,16 @@ Dylan Pieper
 </div>
 <p><strong>Mean confidence: 92%</strong></p>
 </section>
-<section id="llm-structured-data" class="slide level2">
-<h2>LLM structured data</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a>schema <span class="ot">&lt;-</span> <span class="fu">type_object</span>(</span>
-<span id="cb1-2"><a href=""></a>  <span class="at">crime_type =</span> <span class="fu">type_enum</span>(</span>
-<span id="cb1-3"><a href=""></a>    <span class="fu">c</span>(<span class="st">"violent"</span>, <span class="st">"public order"</span>, <span class="st">"property"</span>, <span class="st">"criminal traffic"</span>, </span>
-<span id="cb1-4"><a href=""></a>      <span class="st">"drug"</span>, <span class="st">"dui offense"</span>, <span class="st">"not known/missing"</span>),</span>
-<span id="cb1-5"><a href=""></a>    <span class="st">"The primary crime type.</span></span>
-<span id="cb1-6"><a href=""></a><span class="st">    If violent and another type clearly applies, choose violent."</span>,</span>
-<span id="cb1-7"><a href=""></a>  ),</span>
-<span id="cb1-8"><a href=""></a>  <span class="at">harm_level =</span> <span class="fu">type_enum</span>(</span>
-<span id="cb1-9"><a href=""></a>    <span class="fu">c</span>(<span class="st">"individual"</span>, <span class="st">"community"</span>, <span class="st">"institutional"</span>, <span class="st">"societal"</span>),</span>
-<span id="cb1-10"><a href=""></a>    <span class="st">"The primary harm level"</span></span>
-<span id="cb1-11"><a href=""></a>  ),</span>
-<span id="cb1-12"><a href=""></a>  <span class="at">harm_type =</span> <span class="fu">type_enum</span>(</span>
-<span id="cb1-13"><a href=""></a>    <span class="fu">c</span>(<span class="st">"physical"</span>, <span class="st">"emotional or psychological"</span>, <span class="st">"financial or economic"</span>, </span>
-<span id="cb1-14"><a href=""></a>      <span class="st">"community safety"</span>, <span class="st">"privacy"</span>),</span>
-<span id="cb1-15"><a href=""></a>    <span class="st">"The primary harm type"</span></span>
-<span id="cb1-16"><a href=""></a>  ),</span>
-<span id="cb1-17"><a href=""></a>  <span class="at">uncertainty_score =</span> <span class="fu">type_number</span>(</span>
-<span id="cb1-18"><a href=""></a>    <span class="st">"Your uncertainty in the classification responses and scores,</span></span>
-<span id="cb1-19"><a href=""></a><span class="st">    higher scores reflect unclear or difficult to classify descriptions,</span></span>
-<span id="cb1-20"><a href=""></a><span class="st">    ranging from 0.0 to 1.0."</span></span>
-<span id="cb1-21"><a href=""></a>  )</span>
-<span id="cb1-22"><a href=""></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
 <section id="llm-results" class="slide level2">
 <h2>LLM results</h2>
 <p>Data LLM was “good” at classifying:</p>
 <div class="cell">
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-989729b2993ee0d5b31d" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-989729b2993ee0d5b31d">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5"],["Aggravated Cruelty to Animals - Torture","Corrupt Organizations","Disarming Law Enforcement Officer","Furnishing Drug Free Urine-Use Or Attempt","IDSI Person W/Mental Disability"],["violent","public order","violent","drug","violent"],["individual","institutional","individual","institutional","individual"],["physical","financial or economic","physical","community safety","physical"],[0.95,0.5,0.8,0.8,0.75]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Description<\/th>\n      <th>Crime Type<\/th>\n      <th>Harm Level<\/th>\n      <th>Harm Type<\/th>\n      <th>Probability<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"className":"dt-right","targets":5},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"description","targets":1},{"name":"crime_type","targets":2},{"name":"harm_level","targets":3},{"name":"harm_type","targets":4},{"name":"probability","targets":5}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'20px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'20px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'20px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'20px'});\nvar value=data[5]; $(this.api().cell(row, 5).node()).css({'font-size':'20px'});\nvar value=data[1]; $(row).css({'background-color':value == \"IDSI Person W/Mental Disability\" ? \"yellow\" : value == \"Aggravated Cruelty to Animals - Torture\" ? \"yellow\" : null});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-da002dd9e39bd1ce5af3" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-da002dd9e39bd1ce5af3">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4"],["Aggravated Cruelty to Animals - Torture","IDSI Person W/Mental Disability","Incest of Minor - Complainant 13-18 Years","Unlawful To Fire Any Weapon/Firearm/rocket In City"],["offense against morals/decency","rape","child molestation","weapons offense"],["violent","violent","violent","violent"],["individual","individual","individual","community"],["physical","physical","physical","community safety"],[0.9,0.6,0.9,0.9]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Description<\/th>\n      <th>Off. Category<\/th>\n      <th>Off. Type<\/th>\n      <th>Harm Level<\/th>\n      <th>Harm Type<\/th>\n      <th>Probability<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"className":"dt-right","targets":6},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"description","targets":1},{"name":"offense_category","targets":2},{"name":"offense_type","targets":3},{"name":"harm_level","targets":4},{"name":"harm_type","targets":5},{"name":"probability","targets":6}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'20px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'20px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'20px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'20px'});\nvar value=data[5]; $(this.api().cell(row, 5).node()).css({'font-size':'20px'});\nvar value=data[6]; $(this.api().cell(row, 6).node()).css({'font-size':'20px'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
 </div>
 </div>
-<p><strong>Mean confidence: 78%</strong></p>
+<p><strong>Mean confidence: 77%</strong></p>
 </section>
 <section id="model-agreement" class="slide level2">
 <h2>Model agreement</h2>
@@ -359,8 +281,8 @@ Dylan Pieper
 <h2>Topics of disagreement</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-133d73db9a6bcce1808e" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-133d73db9a6bcce1808e">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6"],["public order","property","criminal traffic","drug","violent","dui offense"],[388,323,434,72,253,67],[139,80,75,9,25,3],["35.8%","24.8%","17.3%","12.5%","9.9%","4.5%"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Crime Type<\/th>\n      <th>Total Cases<\/th>\n      <th>Disagreements<\/th>\n      <th>Disagreement Rate<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"toc_crime_type","targets":1},{"name":"total_cases","targets":2},{"name":"disagreements","targets":3},{"name":"disagreement_rate_pct","targets":4}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'25px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'25px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'25px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'25px'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-cd6366ec9c4c1ceafb41" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-cd6366ec9c4c1ceafb41">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6"],["public order","property","criminal traffic","drug","violent","dui offense"],[388,323,434,72,253,67],[148,65,82,10,26,4],["38.1%","20.1%","18.9%","13.9%","10.3%","6.0%"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Off. Type<\/th>\n      <th>Total Cases<\/th>\n      <th>Disagreements<\/th>\n      <th>Disagreement Rate<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"toc_offense_type","targets":1},{"name":"total_cases","targets":2},{"name":"disagreements","targets":3},{"name":"disagreement_rate_pct","targets":4}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'25px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'25px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'25px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'25px'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
@@ -369,8 +291,8 @@ Dylan Pieper
 <p>Use a comparison table to facilitate review:</p>
 <div class="cell">
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-789182475ab029d03706" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-789182475ab029d03706">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8"],["Conspiracy Retaliation Against Witness or Victim","Conspiracy Possession Of Firearm Prohibited","Investigation/Records","Diss Explicit Sex Mat'l Minor","Persons Not To Possess/Own Firearm","Riot-Intent To Commit Felony","Corrupt Employee, Agent, Fiduciary","Ill Operate Vehicle W/Out Ignition Interlock"],["public order","public order","public order","public order","public order","public order","public order","public order"],["violent","violent","not known/missing","violent","violent","violent","property","dui offense"],["Disagree, uncertain","Disagree, certain","Disagree, uncertain","Disagree, uncertain","Disagree, certain","Disagree, certain","Disagree, certain","Disagree, certain"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Description<\/th>\n      <th>TOC<\/th>\n      <th>LLM<\/th>\n      <th>Review<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"description","targets":1},{"name":"toc_crime_type","targets":2},{"name":"openai_crime_type","targets":3},{"name":"review_type","targets":4}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-weight':'bold','color':'white','background-color':value == \"Disagree, certain\" ? \"#CD5C5C\" : value == \"Disagree, uncertain\" ? \"#DE6F00\" : null});\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'20px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'20px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'20px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'20px'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-c8efd04953ef84aeffc7" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-c8efd04953ef84aeffc7">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8"],["Contraband - Poss of Telecom Device By Inmate","Contraband/Non-Controlled Substan","Criminal Conspiracy Engaging Criminal Use Of Communication Facility","Discharge of Guns Restricted","Incest of Minor - Complainant 13-18 Years","Mand. Use Of Available Sidewalk","Penalties - Sales of Firearms","Scatter Rubbish Upon Land/Stream Etc"],["public order","public order","public order","public order","public order","public order","public order","public order"],["property","drug","drug","violent","violent","criminal traffic","violent","property"],["Disagree, certain","Disagree, uncertain","Disagree, uncertain","Disagree, certain","Disagree, uncertain","Disagree, uncertain","Disagree, uncertain","Disagree, certain"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Description<\/th>\n      <th>TOC<\/th>\n      <th>LLM<\/th>\n      <th>Review<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"description","targets":1},{"name":"toc_offense_type","targets":2},{"name":"openai_offense_type","targets":3},{"name":"review_type","targets":4}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-weight':'bold','color':'white','background-color':value == \"Disagree, certain\" ? \"#CD5C5C\" : value == \"Disagree, uncertain\" ? \"#DE6F00\" : null});\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'20px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'20px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'20px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'20px'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
@@ -378,32 +300,32 @@ Dylan Pieper
 <h2>Bias detection</h2>
 <p>I also discovered systematic biases:</p>
 <div class="fragment">
-<p><strong>Sexual assaults misclassified</strong></p>
+<p><strong>Rape misclassified (“IDSI”)</strong></p>
 </div>
 <ul>
-<li class="fragment">TOC classified 5 of 9 as violent</li>
-<li class="fragment">LLM classified 9 of 9 as violent</li>
+<li class="fragment">TOC classified 5 of 10 as violent</li>
+<li class="fragment">LLM classified 10 of 10 as violent</li>
 </ul>
 <div class="fragment">
-<p><strong>Animal cruelty misclassified</strong></p>
+<p><strong>Animal cruelty misclassified (“Animal”)</strong></p>
 </div>
 <ul>
-<li class="fragment">TOC classified 2 of 12 as violent</li>
-<li class="fragment">LLM classified 12 of 12 as violent</li>
+<li class="fragment">TOC classified 2 of 11 as violent</li>
+<li class="fragment">LLM classified 11 of 11 as violent</li>
 </ul>
 </section>
-<section id="section-1" class="slide level2" data-background-image="chatbot_dogs.png" data-background-size="contain">
+<section id="section-1" class="slide level2" data-background-image="img/chatbot_dogs.png" data-background-size="contain">
 <h2></h2>
 </section>
-<section id="section-2" class="slide level2" data-background-image="archie.jpg" data-background-size="contain">
+<section id="section-2" class="slide level2" data-background-image="img/archie.jpg" data-background-size="contain">
 <h2></h2>
 </section>
 <section id="idsi-comparison" class="slide level2">
 <h2>IDSI comparison</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-313f13d9000c81da5845" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-313f13d9000c81da5845">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10"],["Criminal Attempt IDSI Person Less Than 16 Yrs Age","Criminal Attempt IDSI Person Unconscious","Criminal Solicitation IDSI Person Less Than 16 Yrs Age","IDSI Forcible Compulsion","IDSI Person Less Than 13 Yrs Age","IDSI Person Less Than 16 Yrs Age","IDSI Person Substantially Impaired","IDSI Person Unconscious","IDSI Person W/Mental Disability","IDSI Threat Forcible Compulsion"],["violent","property","violent","violent","criminal traffic","violent","dui offense","public order","property","violent"],["violent","violent","violent","violent","violent","violent","violent","not known/missing","violent","violent"],["Agree","Disagree, uncertain","Agree","Agree","Disagree, uncertain","Agree","Disagree, uncertain","Disagree, uncertain","Disagree, uncertain","Agree"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Description<\/th>\n      <th>TOC<\/th>\n      <th>LLM<\/th>\n      <th>Review<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"description","targets":1},{"name":"toc_crime_type","targets":2},{"name":"openai_crime_type","targets":3},{"name":"review_type","targets":4}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-weight':'bold','color':'white','background-color':value == \"Agree\" ? \"darkgreen\" : value == \"Disagree, certain\" ? \"#CD5C5C\" : value == \"Disagree, uncertain\" ? \"#DE6F00\" : null});\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'20px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'20px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'20px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'20px'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-6e94127d8b38216f4de4" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-6e94127d8b38216f4de4">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10"],["Criminal Attempt IDSI Person Less Than 16 Yrs Age","Criminal Attempt IDSI Person Unconscious","Criminal Solicitation IDSI Person Less Than 16 Yrs Age","IDSI Forcible Compulsion","IDSI Person Less Than 13 Yrs Age","IDSI Person Less Than 16 Yrs Age","IDSI Person Substantially Impaired","IDSI Person Unconscious","IDSI Person W/Mental Disability","IDSI Threat Forcible Compulsion"],["violent","property","violent","violent","criminal traffic","violent","dui offense","public order","property","violent"],["violent","violent","violent","violent","violent","violent","violent","violent","violent","violent"],["Agree","Disagree, uncertain","Agree","Agree","Disagree, uncertain","Agree","Disagree, uncertain","Disagree, uncertain","Disagree, uncertain","Agree"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Description<\/th>\n      <th>TOC<\/th>\n      <th>LLM<\/th>\n      <th>Review<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"pageLength":10,"dom":"t","ordering":false,"columnDefs":[{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"description","targets":1},{"name":"toc_offense_type","targets":2},{"name":"openai_offense_type","targets":3},{"name":"review_type","targets":4}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-weight':'bold','color':'white','background-color':value == \"Agree\" ? \"darkgreen\" : value == \"Disagree, certain\" ? \"#CD5C5C\" : value == \"Disagree, uncertain\" ? \"#DE6F00\" : null});\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'20px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'20px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'20px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-size':'20px'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
@@ -432,7 +354,7 @@ Dylan Pieper
 </ul></li>
 </ul>
 </section>
-<section id="section-3" class="slide level2" data-background-image="ostrich_black_box.png" data-background-size="contain">
+<section id="section-3" class="slide level2" data-background-image="img/ostrich_black_box.png" data-background-size="contain">
 <h2></h2>
 </section>
 <section id="implications-contd" class="slide level2">

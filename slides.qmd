@@ -14,8 +14,6 @@ format:
 ---
 
 ```{r setup, echo = FALSE}
-knitr::opts_knit$set(root.dir = "..")
-
 green <- "darkgreen"
 orange <- "#DE6F00"
 red <- "#CD5C5C"
@@ -33,7 +31,7 @@ Are specialized ML tools and LLMs in competition, or can they work together?
 - Better for specific tasks
 :::
 ::: {.fragment fragment-index=2}
-- Validated and deterministic
+- Validated, deterministic
 :::
 ::: {.fragment fragment-index=3}
 - Straightforward to retrain
@@ -47,7 +45,7 @@ Are specialized ML tools and LLMs in competition, or can they work together?
 - Flexible for many tasks
 :::
 ::: {.fragment fragment-index=2}
-- Not validated or deterministic
+- Not validated, undeterministic
 :::
 ::: {.fragment fragment-index=3}
 - Difficult to retrain
@@ -62,9 +60,11 @@ Are specialized ML tools and LLMs in competition, or can they work together?
 - Classify 1,537 offense descriptions for a racial disparities study in Pennsylvania
   - Get **UCCS crime type** (violent, public order, property, criminal traffic, drug, DUI; [Uniform Crime Classification Standard](https://www.science.org/doi/10.1126/sciadv.abq8123))
   - Get harm-based measures ([UK's Office for National Statistics](https://www.ons.gov.uk/peoplepopulationandcommunity/crimeandjustice/articles/theimpactofcrimeonvictimsandsociety/march2022))
+    - Harm level (e.g., individual vs. institutional)
+    - Harm type (e.g., physical vs. financial or economic)
 :::
 
-## {data-background-image="chatbot_black_mirror.png" data-background-size="contain"}
+## {data-background-image="img/chatbot_black_mirror.png" data-background-size="contain"}
 
 ## Goals 🎯
 
@@ -92,18 +92,17 @@ Are specialized ML tools and LLMs in competition, or can they work together?
 
 ## TOC results
 
-Data TOC was "bad" at classifying:
+Data TOC was "good" at classifying:
 
 ```{r, echo = FALSE}
 toc <- openxlsx::readWorkbook("cjars_toc.xlsx", sheet = 2)
 toc_uccs <- openxlsx::readWorkbook("cjars_toc.xlsx", sheet = 3)
 
 selected_examples <- c(
-  "IDSI Person W/Mental Disability",
-  "Aggravated Cruelty to Animals - Torture",
-  "Disarming Law Enforcement Officer",
-  "Furnishing Drug Free Urine-Use Or Attempt",
-  "Corrupt Organizations"
+  "Incest of Minor - Complainant Under 13 Years",
+  "Invol. Deviate Sexual Intercourse W/Child",
+  "Murder Of The First Degree",
+  "Retail Theft-Take Mdse"
 )
 
 toc_preview <- toc |>
@@ -111,9 +110,10 @@ toc_preview <- toc |>
   dplyr::left_join(toc_uccs, by = "uccs_code") |>
   dplyr::mutate(
     description = stringr::str_squish(description),
+    charge_desc = tolower(charge_desc),
     offense_type_desc = tolower(offense_type_desc)
   ) |>
-  dplyr::select(description, charge_desc, crime_type = offense_type_desc, probability) |>
+  dplyr::select(description, charge_desc, offense_type = offense_type_desc, probability) |>
   dplyr::filter(description %in% selected_examples) |>
   dplyr::arrange(description)
   
@@ -121,7 +121,7 @@ DT::datatable(toc_preview,
    colnames = c(
     "Description" = "description",
     "UCCS Code" = "charge_desc",
-    "Crime Type" = "crime_type", 
+    "Off. Type" = "offense_type", 
     "Probability" = "probability"
   ),
   options = list(
@@ -131,15 +131,53 @@ DT::datatable(toc_preview,
      ordering = FALSE
    )
 ) |>
-DT::formatStyle(columns = 1:ncol(toc_preview), fontSize = '20px') |>
-DT::formatStyle(
-  'Description',
-  target = 'row',
-  backgroundColor = DT::styleEqual(
-    c("IDSI Person W/Mental Disability", "Aggravated Cruelty to Animals - Torture"), 
-    c("yellow", "yellow")
-  )
+  DT::formatStyle(columns = 1:ncol(toc_preview), fontSize = '20px')
+```
+
+**Mean confidence: `r scales::percent(mean(readxl::read_excel("cjars_toc.xlsx", sheet = 2) |> dplyr::pull(probability)), accuracy = 1)`**
+
+## TOC results (cont'd)
+
+Data TOC was "bad" at classifying:
+
+```{r, echo = FALSE}
+toc <- openxlsx::readWorkbook("cjars_toc.xlsx", sheet = 2)
+toc_uccs <- openxlsx::readWorkbook("cjars_toc.xlsx", sheet = 3)
+
+selected_examples <- c(
+  "Aggravated Cruelty to Animals - Torture",
+  "IDSI Person W/Mental Disability",
+  "Incest of Minor - Complainant 13-18 Years",
+  "Unlawful To Fire Any Weapon/Firearm/rocket In City"
 )
+
+toc_preview <- toc |>
+  dplyr::mutate(dplyr::across(where(is.numeric), ~round(.x, 3))) |>
+  dplyr::left_join(toc_uccs, by = "uccs_code") |>
+  dplyr::mutate(
+    description = stringr::str_squish(description),
+    charge_desc = tolower(charge_desc),
+    offense_type_desc = tolower(offense_type_desc)
+  ) |>
+  dplyr::select(description, charge_desc, offense_type = offense_type_desc, probability) |>
+  dplyr::filter(description %in% selected_examples) |>
+  dplyr::arrange(description)
+  
+DT::datatable(toc_preview, 
+   colnames = c(
+    "Description" = "description",
+    "UCCS Code" = "charge_desc",
+    "Off. Type" = "offense_type", 
+    "Probability" = "probability"
+  ),
+  options = list(
+    scrollX = TRUE, 
+     pageLength = 10, 
+     dom = 't',
+     ordering = FALSE
+   )
+) |>
+  DT::formatStyle(columns = 1:ncol(toc_preview), fontSize = '20px')
 ```
 
 ::: {style="font-size: 0.4em;"}
@@ -148,43 +186,13 @@ IDSI = Involuntary Deviate Sexual Intercourse
 
 **Mean confidence: `r scales::percent(mean(readxl::read_excel("cjars_toc.xlsx", sheet = 2) |> dplyr::pull(probability)), accuracy = 1)`**
 
-## LLM structured data
-
-```{r, eval = FALSE, echo = TRUE}
-schema <- type_object(
-  crime_type = type_enum(
-    c("violent", "public order", "property", "criminal traffic", 
-      "drug", "dui offense", "not known/missing"),
-    "The primary crime type.
-    If violent and another type clearly applies, choose violent.",
-  ),
-  harm_level = type_enum(
-    c("individual", "community", "institutional", "societal"),
-    "The primary harm level"
-  ),
-  harm_type = type_enum(
-    c("physical", "emotional or psychological", "financial or economic", 
-      "community safety", "privacy"),
-    "The primary harm type"
-  ),
-  uncertainty_score = type_number(
-    "Your uncertainty in the classification responses and scores,
-    higher scores reflect unclear or difficult to classify descriptions,
-    ranging from 0.0 to 1.0."
-  )
-)
-```
-
 ## LLM results
 
 Data LLM was "good" at classifying:
 
 ```{r, echo = FALSE}
 oai_dat <- utils::read.csv("schema_openai.csv") |>
-  dplyr::mutate(
-    description = read.csv("crimes.csv") |> dplyr::pull(description)
-  ) |>
-  dplyr::select(-interpret, -harm_score, -action_type) |>
+  dplyr::select(-harm_score, -action_type) |>
   dplyr::relocate(description)
 
 DT::datatable(oai_dat |>
@@ -194,7 +202,8 @@ DT::datatable(oai_dat |>
   dplyr::select(-uncertainty_score),
   colnames = c(
     "Description" = "description",
-    "Crime Type" = "crime_type",
+    "Off. Category" = "offense_category",
+    "Off. Type" = "offense_type",
     "Harm Level" = "harm_level",
     "Harm Type" = "harm_type",
     "Probability" = "probability"
@@ -206,15 +215,7 @@ DT::datatable(oai_dat |>
     ordering = FALSE
   )
 ) |>
-DT::formatStyle(columns = 1:ncol(oai_dat), fontSize = '20px') |>
-DT::formatStyle(
-  'Description',
-  target = 'row',
-  backgroundColor = DT::styleEqual(
-    c("IDSI Person W/Mental Disability", "Aggravated Cruelty to Animals - Torture"), 
-    c("yellow", "yellow")
-  )
-)
+  DT::formatStyle(columns = 1:ncol(oai_dat), fontSize = '20px')
 ```
 
 **Mean confidence: `r scales::percent(mean(1 - oai_dat$uncertainty_score), accuracy = 1)`**
@@ -222,23 +223,23 @@ DT::formatStyle(
 ## Model agreement
 
 ```{r, echo = FALSE}
-crime_types <- toc |>
+offense_types <- toc |>
   dplyr::left_join(toc_uccs, by = "uccs_code") |>
   dplyr::select(description, offense_type_desc, probability) |>
   dplyr::mutate(
     offense_type_desc = tolower(offense_type_desc),
     description = stringr::str_squish(description)
   ) |>
-  dplyr::rename(toc_crime_type = offense_type_desc) |>
+  dplyr::rename(toc_offense_type = offense_type_desc) |>
   dplyr::left_join(
     oai_dat |> dplyr::mutate(description = stringr::str_squish(description)),
     by = "description"
   ) |>
-  dplyr::rename(openai_crime_type = crime_type) |>
-  dplyr::select(description, toc_crime_type, openai_crime_type, probability, uncertainty_score) |>
+  dplyr::rename(openai_offense_type = offense_type) |>
+  dplyr::select(description, toc_offense_type, openai_offense_type, probability, uncertainty_score) |>
   dplyr::mutate(
     both_confident = probability >= 0.8 & uncertainty_score <= 0.2,
-    agreement = toc_crime_type == openai_crime_type,
+    agreement = toc_offense_type == openai_offense_type,
     review = dplyr::case_when(
       both_confident & !agreement ~ "yes, disagree & certain",
       !both_confident & !agreement ~ "yes, disagree & uncertain",
@@ -247,7 +248,7 @@ crime_types <- toc |>
   ) |>
   dplyr::select(-both_confident, -agreement)
 
-review_summary <- crime_types |>
+review_summary <- offense_types |>
   dplyr::count(review) |>
   dplyr::mutate(
     percent = n / sum(n),
@@ -298,12 +299,12 @@ ggplot2::ggplot(review_summary, ggplot2::aes(x = review_clean, y = percent, fill
 ## Topics of disagreement 
 
 ```{r, echo = FALSE}
-# summary disagreement table by crime type
-disagreement_by_type <- crime_types |>
-  dplyr::group_by(toc_crime_type) |>
+# summary disagreement table by offense type
+disagreement_by_type <- offense_types |>
+  dplyr::group_by(toc_offense_type) |>
   dplyr::summarise(
     total_cases = dplyr::n(),
-    disagreements = sum(toc_crime_type != openai_crime_type),
+    disagreements = sum(toc_offense_type != openai_offense_type),
     disagreement_rate = disagreements / total_cases,
     .groups = 'drop'
   ) |>
@@ -316,7 +317,7 @@ disagreement_by_type <- crime_types |>
 DT::datatable(
   disagreement_by_type,
   colnames = c(
-    "Crime Type" = "toc_crime_type",
+    "Off. Type" = "toc_offense_type",
     "Total Cases" = "total_cases", 
     "Disagreements" = "disagreements",
     "Disagreement Rate" = "disagreement_rate_pct"
@@ -336,18 +337,19 @@ DT::datatable(
 Use a comparison table to facilitate review:
 
 ```{r, echo = FALSE}
-review_examples <- crime_types |>
+review_examples <- offense_types |>
   dplyr::filter(review != "no") |>
-  dplyr::select(description, toc_crime_type, openai_crime_type, review) |>
+  dplyr::select(description, toc_offense_type, openai_offense_type, review) |>
   dplyr::mutate(
     review_type = dplyr::case_when(
       review == "yes, disagree & certain" ~ "Disagree, certain",
       review == "yes, disagree & uncertain" ~ "Disagree, uncertain"
     )
   ) |>
-  dplyr::select(description, toc_crime_type, openai_crime_type, review_type) |>
-  dplyr::filter(toc_crime_type %in% "public order") |>
+  dplyr::select(description, toc_offense_type, openai_offense_type, review_type) |>
+  dplyr::filter(toc_offense_type %in% "public order") |>
   dplyr::sample_n(8)
+  dplyr::arrange(description)
 
 DT::datatable(
   review_examples,
@@ -375,39 +377,39 @@ DT::datatable(
 I also discovered systematic biases:
 
 ```{r, echo = FALSE}
-idsi_toc_num <- crime_types |>
+idsi_toc_num <- offense_types |>
   dplyr::filter(stringr::str_detect(description, "IDSI")) |>
-  dplyr::filter(toc_crime_type == "violent") |>
+  dplyr::filter(toc_offense_type == "violent") |>
   nrow()
 
-idsi_openai_num <- crime_types |>
+idsi_openai_num <- offense_types |>
   dplyr::filter(stringr::str_detect(description, "IDSI")) |>
-  dplyr::filter(openai_crime_type == "violent") |>
+  dplyr::filter(openai_offense_type == "violent") |>
   nrow()
 
-idsi_denom <- crime_types |>
+idsi_denom <- offense_types |>
   dplyr::filter(stringr::str_detect(description, "IDSI")) |>
-  dplyr::filter(openai_crime_type == "violent") |>
+  dplyr::filter(openai_offense_type == "violent") |>
   nrow()
 
-ani_cruel_toc_num <- crime_types |>
+ani_cruel_toc_num <- offense_types |>
   dplyr::filter(stringr::str_detect(description, "Animal")) |>
-  dplyr::filter(toc_crime_type == "violent") |>
+  dplyr::filter(toc_offense_type == "violent") |>
   nrow()
 
-ani_cruel_openai_num <- crime_types |>
+ani_cruel_openai_num <- offense_types |>
   dplyr::filter(stringr::str_detect(description, "Animal")) |>
-  dplyr::filter(openai_crime_type == "violent") |>
+  dplyr::filter(openai_offense_type == "violent") |>
   nrow()
 
-ani_cruel_denom <- crime_types |>
+ani_cruel_denom <- offense_types |>
   dplyr::filter(stringr::str_detect(description, "Animal")) |>
-  dplyr::filter(openai_crime_type == "violent") |>
+  dplyr::filter(openai_offense_type == "violent") |>
   nrow()
 ```
 
 ::: {.fragment}
-**Sexual assaults misclassified**
+**Rape misclassified ("IDSI")**
 :::
 
 ::: {.incremental}
@@ -416,7 +418,7 @@ ani_cruel_denom <- crime_types |>
 :::
 
 ::: {.fragment}
-**Animal cruelty misclassified**
+**Animal cruelty misclassified ("Animal")**
 :::
 
 ::: {.incremental}
@@ -424,14 +426,14 @@ ani_cruel_denom <- crime_types |>
 - LLM classified `r ani_cruel_openai_num` of `r ani_cruel_denom` as violent
 :::
 
-## {data-background-image="chatbot_dogs.png" data-background-size="contain"}
-## {data-background-image="archie.jpg" data-background-size="contain"}
+## {data-background-image="img/chatbot_dogs.png" data-background-size="contain"}
+## {data-background-image="img/archie.jpg" data-background-size="contain"}
 
 ## IDSI comparison
 
 ```{r, echo = FALSE}
-review_examples <- crime_types |>
-  dplyr::select(description, toc_crime_type, openai_crime_type, review) |>
+review_examples <- offense_types |>
+  dplyr::select(description, toc_offense_type, openai_offense_type, review) |>
   dplyr::mutate(
     review_type = dplyr::case_when(
       review == "no" ~ "Agree",
@@ -439,7 +441,7 @@ review_examples <- crime_types |>
       review == "yes, disagree & uncertain" ~ "Disagree, uncertain"
     )
   ) |>
-  dplyr::select(description, toc_crime_type, openai_crime_type, review_type) |>
+  dplyr::select(description, toc_offense_type, openai_offense_type, review_type) |>
   dplyr::filter(stringr::str_detect(description, "IDSI")) |>
   dplyr::arrange(description) |>
   dplyr::slice_head(n = 10)
@@ -494,7 +496,7 @@ DT::formatStyle(columns = 1:ncol(review_examples), fontSize = '20px')
   - To tool developers
 :::
 
-## {data-background-image="ostrich_black_box.png" data-background-size="contain"}
+## {data-background-image="img/ostrich_black_box.png" data-background-size="contain"}
 
 ## Implications (cont'd)
 
